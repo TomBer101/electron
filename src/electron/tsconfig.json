@@ -5,5 +5,7 @@
         "module": "NodeNext",
         "outDir": "../../dist-electron",
         "skipLibCheck": true,
-    }
+    },
+    "include": ["**/*"],
+    "exclude": ["node_modules"]
 }
