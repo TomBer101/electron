@@ -30,6 +30,19 @@ export const NotesPage = () => {
         fetchNotes()
     }, [])
 
+    const handleDeleteNote = async (id: string) => {
+        try {
+            await window.electronAPI.deleteNote(id)
+            setNotes(notes.filter(note => note.id !== id))
+        } catch (err) {
+            setError('An error occurred while deleting the note')
+        }
+    }
+
+    const handleEditNote = async (id: string) => {
+        navigate(`/notes/${id}`)
+    }
+
     if (loading) {
         return <div>Loading notes...</div>
     }
@@ -54,8 +67,8 @@ export const NotesPage = () => {
                             <Note
                                 key={note.id}
                                 note={note}
-                                onEdit={() => {}}
-                                onDelete={() => {}}
+                                onEdit={handleEditNote}
+                                onDelete={handleDeleteNote}
                             />
                         ))}
                     </div>

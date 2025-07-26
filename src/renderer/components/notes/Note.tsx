@@ -16,6 +16,7 @@ interface NoteProps {
 export const Note: React.FC<NoteProps> = ({ note, onDelete, onEdit }) => {
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
     const [showReadMore, setShowReadMore] = useState<boolean>(false);
+    const [isPinned, setIsPinned] = useState<boolean>(note.isPinned);
     const contentRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -33,6 +34,15 @@ export const Note: React.FC<NoteProps> = ({ note, onDelete, onEdit }) => {
             day: 'numeric'
         });
     };
+
+    const handleTogglePin = async (id: string) => {
+        try {
+            await window.electronAPI.updateNote(id, { isPinned: !isPinned })  
+            setIsPinned(!isPinned)
+        } catch (err) {
+            console.error('Error toggling pin:', err)
+        }
+    }
 
     const getContentPreview = () => {
         return (
@@ -70,9 +80,13 @@ export const Note: React.FC<NoteProps> = ({ note, onDelete, onEdit }) => {
         <div className={styles.noteContainer}>
             <div className={styles.noteHeader}>
                 <h3 className={styles.noteTitle}>{note.title}</h3>
-                
-                    <PinIcon />
-              
+                <button 
+                    className={styles.iconButton}
+                    onClick={() => handleTogglePin(note.id)}
+                    title="Toggle pin"
+                >
+                    <PinIcon style={{fill: isPinned ? 'green' : 'red',}}/>
+                </button>
             </div>
             
             <small className={styles.dateText}>
