@@ -1,7 +1,7 @@
 import { INoteRepository } from "./interfaces/INoteRepository.js";
 import { Note, NoteInput } from "../../shared/models.js";
 import { IDataSource } from "../lib/dataSources/IDataSource.js";
-import { v4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export class NotesRepository implements INoteRepository {
     constructor(private dataSource: IDataSource<Note>) {}
@@ -21,7 +21,7 @@ export class NotesRepository implements INoteRepository {
 
     async createNote(note: NoteInput): Promise<Note> {
         const notes = await this.dataSource.read()
-        const newNote = { ...note, id: v4(), createdAt: new Date(), tags: []}
+        const newNote = { ...note, id: uuidv4(), createdAt: new Date(), tags: []}
 
         notes.push(newNote)
         await this.dataSource.write(notes)
