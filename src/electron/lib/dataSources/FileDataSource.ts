@@ -1,6 +1,7 @@
 import { readFile, writeFile, access, mkdir } from 'fs/promises'
 import { dirname } from 'path'
 import { IDataSource } from './IDataSource.js'
+import { DataSourceReadError } from '../../errors/DataSourceError.js'
 
 
 export class FileDataSource<T extends { id: string }> implements IDataSource<T> {
@@ -74,7 +75,7 @@ export class FileDataSource<T extends { id: string }> implements IDataSource<T> 
             return existingData.find(item => item.id === id) || null
         } catch (error) {
             console.error('Error finding by ID:', error)
-            return null
+            throw new DataSourceReadError(`Failed to find item by ID: ${id}`)
         }
     }
 
