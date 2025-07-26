@@ -5,6 +5,10 @@
         "module": "NodeNext",
         "outDir": "../../dist-electron",
         "skipLibCheck": true,
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        
     },
     "include": ["**/*"],
     "exclude": ["node_modules"]
