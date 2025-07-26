@@ -4,11 +4,17 @@ import { Button } from '../components/common/Button'
 import { useNavigate } from 'react-router-dom'
 import { FloatingContainer } from '../components/common/FloatingContainer'
 import { Note } from '../components/notes/Note'
+import Toast, { ToastType } from '../components/common/Toast'
 
 export const NotesPage = () => {
     const navigate = useNavigate()
     const [notes, setNotes] = useState<NoteType[]>([])
     const [error, setError] = useState<string | null>(null)
+    const [toast, setToast] = useState<{
+        message: string
+        type: ToastType
+        isVisible: boolean
+    } | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -33,9 +39,18 @@ export const NotesPage = () => {
     const handleDeleteNote = async (id: string) => {
         try {
             await window.electronAPI.deleteNote(id)
+            setToast({
+                message: 'Note deleted successfully',
+                type: ToastType.Success,
+                isVisible: true
+            })
             setNotes(notes.filter(note => note.id !== id))
         } catch (err) {
-            setError('An error occurred while deleting the note')
+            setToast({
+                message: 'An error occurred while deleting the note',
+                type: ToastType.Error,
+                isVisible: true
+            })
         }
     }
 
@@ -73,6 +88,13 @@ export const NotesPage = () => {
                         ))}
                     </div>
             )}
+
+            <Toast 
+                type={toast?.type || ToastType.Info}
+                message={toast?.message || ''}
+                isVisible={toast?.isVisible || false}
+                onClose={() => setToast(null)}
+            />
 
             <FloatingContainer
                 position="bottom-right"
