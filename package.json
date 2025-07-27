@@ -22,8 +22,10 @@
     "dist:linux": "npm run transpile:electron && npm run build && electron-builder --linux --x64"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.8.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-redux": "^9.2.0",
     "react-router-dom": "^7.7.1",
     "uuid": "^11.1.0"
   },
