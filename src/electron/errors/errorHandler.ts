@@ -8,31 +8,19 @@ export const wrapAsync = async <T>(fn: () => Promise<T>): Promise<{data: T | nul
     }
 }
 
-// New function specifically for IPC handlers
+// Modified function to throw errors for Redux compatibility
 export const handleIPCError = async <T>(
     handler: () => Promise<T>
-): Promise<{ success: boolean; data?: T; error?: string }> => {
+): Promise<T> => {
     try {
-        const data = await handler()
-        return { success: true, data }
+        return await handler()
     } catch (error) {
         const errorMessage = error instanceof AppError 
             ? error.message 
             : (error as Error).message || 'An unknown error occurred'
         
         console.error('IPC Handler Error:', error)
-        return { success: false, error: errorMessage }
+        throw new Error(errorMessage)
     }
 }
 
-// For cases where you want to throw errors to the renderer
-export const handleIPCErrorWithThrow = async <T>(
-    handler: () => Promise<T>
-): Promise<T> => {
-    try {
-        return await handler()
-    } catch (error) {
-        console.error('IPC Handler Error:', error)
-        throw error // Re-throw to be handled by Electron's IPC error handling
-    }
-}
