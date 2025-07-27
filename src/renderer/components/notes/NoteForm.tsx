@@ -1,24 +1,30 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Note, NoteInput } from "../../../shared/models"
-import { Tag } from "../../../shared/models"
 import { Button } from "../common/Button"
-import { Spinner } from "../common/Spinner"
 import Toast, { ToastType } from "../common/Toast"
-import { FloatingContainer } from "../common/FloatingContainer"
+import { Spinner } from "../common/Spinner"
+import styles from "./NoteForm.module.css"
+import pinOnIcon from "../../assets/icons/pinon.svg"
+import pinOffIcon from "../../assets/icons/pinoff.svg"
+import { createNote, updateNote } from "../../features/notes/notesSlice"
+import { useAppDispatch, useAppSelector } from "../../app/hooks"
+import { setSelectedTags } from "../../features/tags/tagsSlice"
 
 export const NoteForm = () => {
 
     const { id } = useParams()
     const navigate = useNavigate()
+    const dispatch = useAppDispatch()
     const [note, setNote] = useState<Note | null>(null)
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
     const [isPinned, setIsPinned] = useState(false)
-    const [tags, setTags] = useState<Tag[]>([]) // should be derrived from the store
+    const selectedTags = useAppSelector(state => state.tags.selectedTags)
 
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isInitialLoading, setIsInitialLoading] = useState<boolean>(!!id)
+    const [titleError, setTitleError] = useState<string>('')
     const [toast, setToast] = useState<{
         message: string
         type: ToastType
@@ -35,19 +41,14 @@ export const NoteForm = () => {
                 setIsLoading(true)
                 try {
                     const noteData = await window.electronAPI.getNoteById(id)
-                    if (noteData) {
-                        setNote(noteData)
-                        setTitle(noteData.title)
-                        setContent(noteData.content)
-                        setIsPinned(noteData.isPinned)
-                        setTags(noteData.tags)
-                    } else {
-                        showToast('Note not found', ToastType.Error)
-                        navigate('/')
-                    }
+                    setNote(noteData)
+                    setTitle(noteData.title)
+                    setContent(noteData.content)
+                    setIsPinned(noteData.isPinned)
+                    dispatch(setSelectedTags(noteData.tags))
                 } catch (error) {
                     console.error('Error fetching note:', error)
-                    showToast('Error fetching note', ToastType.Error)
+                    showToast('Note not found', ToastType.Error)
                     navigate('/')
                 } finally {
                     setIsLoading(false)
@@ -58,31 +59,49 @@ export const NoteForm = () => {
         fetchNote()
     }, [id, navigate])
 
+    const validateTitle = (value: string): string => {
+        if (!value.trim()) {
+            return 'Title is required'
+        }
+        if (value.trim().length < 2) {
+            return 'Title must be at least 2 characters long'
+        }
+        return ''
+    }
+
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        setTitle(value)
+        setTitleError(validateTitle(value))
+    }
+
     const handleSave = async () => {
-        if (isLoading) return
-        if (!title.trim()) {
-            showToast('Title is required', ToastType.Error)
+        if (isLoading || isInitialLoading) return
+        
+        const titleValidation = validateTitle(title)
+        if (titleValidation) {
+            setTitleError(titleValidation)
+            showToast(titleValidation, ToastType.Error)
             return
         }
 
         setIsLoading(true)
         const noteData: NoteInput = {
-            title,
-            content,
+            title: title.trim(),
+            content: content.trim(),
             isPinned,
-            tags
+            tags: selectedTags
         }
 
         try {
             if (id) {
-                await window.electronAPI.updateNote(id, noteData)
+                const updatedNote = await dispatch(updateNote({ id, note: noteData })).unwrap()
+                setNote(updatedNote)
                 showToast('Note updated successfully', ToastType.Success)
             } else {
-                const {data: newNote} = await window.electronAPI.createNote(noteData)
+                const newNote = await dispatch(createNote(noteData)).unwrap()
                 showToast('Note created successfully', ToastType.Success)
-                if (newNote && newNote.id) {
-                    navigate(`/notes/${newNote.id}/edit`)
-                }
+                navigate(`/notes/${newNote.id}/edit`)
             }
 
             setTimeout(() => {
@@ -100,6 +119,10 @@ export const NoteForm = () => {
         navigate('/')
     }
 
+    const handlePinToggle = () => {
+        setIsPinned(!isPinned)
+    }
+
     const showToast = (message: string, type: ToastType) => {
         setToast({
             message,
@@ -112,50 +135,94 @@ export const NoteForm = () => {
         setToast(prev => ({ ...prev, isVisible: false }))
     }
 
+    const containerClass = `${styles.container} ${isLoading ? styles.loading : ''} ${isInitialLoading ? styles.loadingOverlay : ''}`
+
     return (
-        <div>
-            <h1>{id ? 'Edit Note' : 'New Note'}</h1>
-            <form>
-                <div>
-                    <label>Title:</label>
-                    <input 
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                    />
+        <div className={containerClass}>
+            {isInitialLoading && (
+                <div className={styles.loadingSpinner}>
+                    <Spinner size="large" />
                 </div>
-                <div>
-                    <label>Content:</label>
+            )}
+            
+            <div className={styles.header}>
+                <h1 className={styles.title}>{id ? 'Edit Note' : 'New Note'}</h1>
+            </div>
+            
+            <form className={styles.form} onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="title">Title *</label>
+                    <input 
+                        id="title"
+                        type="text"
+                        className={`${styles.input} ${titleError ? styles.error : ''}`}
+                        value={title}
+                        onChange={handleTitleChange}
+                        placeholder="Enter note title..."
+                        disabled={isLoading}
+                    />
+                    {titleError && (
+                        <div className={styles.errorMessage}>
+                            <span>⚠</span>
+                            {titleError}
+                        </div>
+                    )}
+                </div>
+                
+                <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="content">Content</label>
                     <textarea
+                        id="content"
+                        className={`${styles.input} ${styles.textarea}`}
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
+                        placeholder="Enter note content..."
+                        disabled={isLoading}
                     />
                 </div>
-                <div>
-                    <label>
+                
+                <div className={styles.pinSection}>
+                    <label className={styles.pinLabel} >
                         <input
                             type="checkbox"
+                            className={styles.pinCheckbox}
                             checked={isPinned}
-                            onChange={(e) => setIsPinned(e.target.checked)}
+                            onChange={handlePinToggle}
                         />
-                        Pinned
+                        <img 
+                            src={isPinned ? pinOnIcon : pinOffIcon} 
+                            alt={isPinned ? "Pinned" : "Not pinned"}
+                            className={`${styles.pinIcon} ${isPinned ? styles.pinned : styles.unpinned}`}
+                        />
+                        {isPinned ? 'Pinned' : 'Pin this note'}
                     </label>
                 </div>
+                
                 {note && (
-                    <div>
-                        <p>Created: {new Date(note.createdAt).toLocaleString()}</p>
+                    <div className={styles.metadata}>
+                        <p className={styles.metadataText}>
+                            Created: {new Date(note.createdAt).toLocaleString()}
+                        </p>
                     </div>
                 )}
 
+                <div className={styles.actions}>
+                    <Button 
+                        variant="secondary" 
+                        onClick={handleCancel} 
+                        disabled={isLoading}
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        variant="primary" 
+                        onClick={handleSave} 
+                        disabled={isLoading || !!titleError}
+                    >
+                        {isLoading ? 'Saving...' : (id ? 'Update' : 'Create')}
+                    </Button>
+                </div>
             </form>
-
-            <FloatingContainer
-                position="bottom-right"
-                gap={10}
-            >
-                <Button variant="primary" onClick={handleSave} disabled={isLoading}>Save</Button>
-                <Button variant="danger" onClick={handleCancel} disabled={isLoading}>Cancel</Button>
-            </FloatingContainer>
 
             <Toast
                 message={toast.message}

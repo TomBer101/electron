@@ -6,6 +6,8 @@ import styles from './Note.module.css';
 import PinIcon from '../../assets/icons/pinOn.svg?react';
 import EditIcon from '../../assets/icons/edit.svg?react';
 import DeleteIcon from '../../assets/icons/delete.svg?react';
+import { togglePinNote } from '../../features/notes/notesSlice';
+import { useAppDispatch } from '../../app/hooks';
 
 interface NoteProps {
     note: NoteType;
@@ -14,6 +16,7 @@ interface NoteProps {
 }
 
 export const Note: React.FC<NoteProps> = ({ note, onDelete, onEdit }) => {
+    const dispatch = useAppDispatch()
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
     const [showReadMore, setShowReadMore] = useState<boolean>(false);
     const [isPinned, setIsPinned] = useState<boolean>(note.isPinned);
@@ -37,7 +40,7 @@ export const Note: React.FC<NoteProps> = ({ note, onDelete, onEdit }) => {
 
     const handleTogglePin = async (id: string) => {
         try {
-            await window.electronAPI.updateNote(id, { isPinned: !isPinned })  
+            dispatch(togglePinNote(id))  
             setIsPinned(!isPinned)
         } catch (err) {
             console.error('Error toggling pin:', err)
