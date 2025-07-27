@@ -4,14 +4,14 @@ export interface Note {
     content: string
     createdAt: Date,
     isPinned: boolean
-    tags: Tag[]
+    tags: string[]
 }
 
 export interface NoteInput {
     title: string
     content: string
     isPinned: boolean,
-    tags: Tag[]
+    tags: string[]
 }
 
 export interface Tag {

@@ -1,27 +1,16 @@
-import { Note, NoteInput } from "./models.js"
+import { Note, NoteInput, Tag } from "./models.js"
 
-// Base response type for IPC calls
-export interface IPCResponse<T> {
-    success: boolean
-    data?: T
-    error?: string
-}
+// Function types - now return direct data or throw errors
+export type GetNotes = () => Promise<Note[]>
+export type GetNoteById = (id: string) => Promise<Note>
+export type CreateNote = (noteInput: NoteInput) => Promise<Note>
+export type UpdateNote = (id: string, noteInput: Partial<NoteInput>) => Promise<Note>
+export type DeleteNote = (id: string) => Promise<{ success: boolean }>
+export type TogglePinNote = (id: string) => Promise<Note>
 
-// Specific response types
-export type GetNotesResponse = IPCResponse<Note[]>
-export type GetNoteByIdResponse = Note // Throws on error
-export type CreateNoteResponse = IPCResponse<Note>
-export type UpdateNoteResponse = IPCResponse<Note>
-export type DeleteNoteResponse = IPCResponse<{ success: boolean }>
-export type TogglePinNoteResponse = IPCResponse<Note>
-
-// Function types
-export type GetNotes = () => Promise<GetNotesResponse>
-export type GetNoteById = (id: string) => Promise<GetNoteByIdResponse>
-export type CreateNote = (noteInput: NoteInput) => Promise<CreateNoteResponse>
-export type UpdateNote = (id: string, noteInput: Partial<NoteInput>) => Promise<UpdateNoteResponse>
-export type DeleteNote = (id: string) => Promise<DeleteNoteResponse>
-export type TogglePinNote = (id: string) => Promise<TogglePinNoteResponse>
+export type GetTags = () => Promise<Tag[]>
+export type CreateTag = (tag: Omit<Tag, 'id'>) => Promise<Tag>
+export type DeleteTag = (id: string) => Promise<{ success: boolean }>
 
 export interface ElectronAPI {
     getNotes: GetNotes
@@ -30,6 +19,9 @@ export interface ElectronAPI {
     updateNote: UpdateNote
     deleteNote: DeleteNote
     togglePinNote: TogglePinNote
+    getTags: GetTags
+    createTag: CreateTag
+    deleteTag: DeleteTag
 }
 
 declare global {
