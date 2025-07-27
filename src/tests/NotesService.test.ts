@@ -17,7 +17,7 @@ const mockNotes: Note[] = [
         content: 'This is the content of test note 1',
         createdAt: new Date('2024-01-01T10:00:00Z'),
         isPinned: false,
-        tags: [mockTags[0]]
+        tags: [mockTags[0].id]
     },
     {
         id: 'note2',
@@ -25,7 +25,7 @@ const mockNotes: Note[] = [
         content: 'This is the content of test note 2',
         createdAt: new Date('2024-01-02T11:00:00Z'),
         isPinned: true,
-        tags: [mockTags[1], mockTags[2]]
+        tags: [mockTags[1].id, mockTags[2].id]
     },
     {
         id: 'note3',
@@ -142,7 +142,7 @@ describe('NotesService', () => {
                 title: 'New Note',
                 content: 'New note content',
                 isPinned: false,
-                tags: [mockTags[0]]
+                tags: [mockTags[0].id]
             }
             const expectedNote: Note = {
                 id: 'new-note-id',
