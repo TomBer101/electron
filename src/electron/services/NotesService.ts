@@ -78,4 +78,14 @@ export class NotesService {
             throw new NoteNotFoundError(id)
         }
     }
+
+    async togglePinNote(id: string): Promise<Note | null> {
+        const note = await this.noteRepository.getNoteById(id)
+        if (!note) {
+            throw new NoteNotFoundError(id)
+        }
+
+        note.isPinned = !note.isPinned
+        return await this.noteRepository.updateNote(id, note)
+    }
 }

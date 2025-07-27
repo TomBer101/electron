@@ -21,7 +21,7 @@ export class NotesRepository implements INoteRepository {
 
     async createNote(note: NoteInput): Promise<Note> {
         const notes = await this.dataSource.read()
-        const newNote = { ...note, id: uuidv4(), createdAt: new Date(), tags: []}
+        const newNote = { ...note, id: uuidv4(), createdAt: new Date(), tags: note.tags || []}
 
         notes.push(newNote)
         await this.dataSource.write(notes)
