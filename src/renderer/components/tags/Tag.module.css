@@ -1,0 +1,88 @@
+.tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    margin: 4px;
+    border-radius: 16px;
+    background-color: #e0e0e0;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.tag:hover {
+    background-color: #d0d0d0;
+}
+
+.tag.selected {
+    background-color: #2196f3;
+    color: white;
+}
+
+/* TagsList styles */
+.tagsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+}
+
+.deleteButton {
+    margin-left: 8px;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.deleteButton:hover {
+    color: #ff4444;
+}
+
+/* TagForm styles */
+.tagForm {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.tagInput {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.tagInput:focus {
+    outline: none;
+    border-color: #2196f3;
+}
+
+.addButton {
+    padding: 8px 16px;
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.addButton:hover {
+    background-color: #1976d2;
+}
+
+.addButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
