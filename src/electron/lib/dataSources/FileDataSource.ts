@@ -33,7 +33,9 @@ export class FileDataSource<T extends { id: string }> implements IDataSource<T> 
     async read(): Promise<T[]> {
         try {
             const content = await readFile(this.filePath, 'utf-8')
-            return JSON.parse(content)
+  
+            const parsed = JSON.parse(content)
+            return parsed
         } catch (error) {
             console.error('Error reading JSON file:', error)
             return []
